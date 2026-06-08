@@ -1,3 +1,10 @@
+%define ROW 100
+%define ROW 100
+%define WIDTH 320
+%define HEIGHT 200
+
+%define BALLSIZE 10
+
 org 0x7c00
 bits 16
 
@@ -48,8 +55,65 @@ putss:
         pop si
         pop ax
         ret
-        
+
+; ============================================== ;
+; ROUTINE:      draw_ball                        ;
+; PURPOSE:      Draws ball at position (si, di). ;
+; INPUTS:       si - X coordinate.               ;
+;               di - Y coordinate.               ;
+;               dl - color.                      ;
+; OUTPUT:       None                             ;
+; MODIFIERS:    None                             ;
+; ASSUMPTIONS:  None                             ;
+; ============================================== ;
+draw_ball:
+        push bx
+        push dx
+        push cx
+
+        push dx
+        mov ax, WIDTH
+        mul di
+        add ax, si
+        pop dx
+
+        mov bx, ax
+        push bx
+
+        mov ch, BALLSIZE
+.draw_row:
+        mov cl, BALLSIZE
+.draw_cell:
+	mov byte [es:bx], dl
+
+        dec cl
+        jz .end_cell
+
+        inc bx
+        jmp .draw_cell
+
+.end_cell:
+        dec ch
+        jz .end
+
+        pop bx
+        add bx, WIDTH
+        push bx
+
+        jmp .draw_row
+.end:
+        pop bx
+        pop cx
+        pop dx
+        pop bx
+        ret
+
 main:
+        ;; Setup stack
+        mov ax, 0x9000
+        mov ss, ax
+        mov sp, 0xfffe
+
 	mov ah, 0h
 	mov al, 13h
 	int 10h
@@ -57,12 +121,10 @@ main:
 	mov ax, 0xa000
 	mov es, ax
 
-	mov bx, 0
-loop:
-	mov byte [es:bx], 0x0b
-	inc bx
-	cmp bx, 64000
-	jb loop
+        mov si, 10
+        mov di, 10
+        mov dl, 0bh
+        call draw_ball
 
 	hlt
 
