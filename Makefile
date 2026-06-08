@@ -1,5 +1,5 @@
-all: pinpong
-	qemu-system-i386 pinpong
+all: pingpong
+	qemu-system-i386 build/pingpong
 
 pingpong: pingpong.asm
-	nasm pingpong.asm -o pingpong
+	nasm pingpong.asm -o build/pingpong
