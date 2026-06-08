@@ -13,6 +13,7 @@ jmp main
 msg     db 'Hello, world'
 msg_len equ $ - msg
 
+
 ; ====================================================== ;
 ; ROUTINE:      putc                                     ;
 ; PURPOSE:      Print a character on the screen.         ;
@@ -108,24 +109,79 @@ draw_ball:
         pop bx
         ret
 
+sleep:
+        push si
+        push ax
+        push dx
+        push cx
+
+
+        xor dx, dx
+
+        mov dx, 0x0f42
+        xor cx, cx
+
+
+        mov ah, 86h
+.loop:
+        int 15h
+
+        dec si
+        jz .end
+        jmp .loop
+.end:
+        pop cx
+        pop dx
+        pop ax
+        pop si
+        ret
+
+clear:
+        push di
+        push cx
+        push ax
+
+        xor di, di
+        mov cx, 320 * 200 / 2
+        rep stosb
+
+
+        pop ax
+        pop cx
+        pop di
+        ret
+
 main:
         ;; Setup stack
-        mov ax, 0x9000
+        mov ax, 0x900
         mov ss, ax
         mov sp, 0xfffe
 
+        mov ax, 0xa000
+        mov es, ax
+        
 	mov ah, 0h
 	mov al, 13h
 	int 10h
 
-	mov ax, 0xa000
-	mov es, ax
-
+        mov cl, 5
         mov si, 10
+.loop:
+        mov al, 76h
+        call clear
+        
         mov di, 10
         mov dl, 0bh
         call draw_ball
 
+        add si, 10
+        push si
+        mov si, 50
+        call sleep
+        pop si
+
+        jmp .loop
+.end:
 	hlt
 
 times 510 - ($-$$) db 0
