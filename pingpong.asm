@@ -50,10 +50,20 @@ putss:
         ret
         
 main:
-        mov cx, msg_len 
-        mov si, msg
+	mov ah, 0h
+	mov al, 13h
+	int 10h
 
-        call putss
+	mov ax, 0xa000
+	mov es, ax
+
+	mov bx, 0
+loop:
+	mov byte [es:bx], 0x0b
+	inc bx
+	cmp bx, 64000
+	jb loop
+
 	hlt
 
 times 510 - ($-$$) db 0
