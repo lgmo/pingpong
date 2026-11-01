@@ -152,6 +152,7 @@ clear:
     pop di
     ret
 
+; TODO - Preserve the BIOS clock
 handler:
     pusha
     push ds
@@ -203,6 +204,31 @@ main:
     popf
 
     pop es
+
+
+    pushf
+    cli
+
+    ;; 0x36 = 0011 0110
+    ;; 00 (channel 0) 
+    ;; 11 (write low byte then hight byte)
+    ;; 011 (mode 3)
+    ;; 0 (binary count - 0 is BCD)
+    mov al, 0x36                
+
+    ;; Command port for PIT
+    out 0x43, al 
+
+    ;; Divisor of the number of pulses per second
+    ;; 1,193,182 / 60 󰾞  19886
+    mov ax, 19886 
+
+    ;; Data port for the channel 0
+    out 0x40, al
+    mov al, ah
+    out 0x40, al
+
+    popf
 
     mov cl, 5
     mov si, 10
